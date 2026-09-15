@@ -196,6 +196,58 @@ class TaskServiceTest {
         }
     }
 
+    @Nested
+    @DisplayName("SinResponsable")
+    class SinResponsable {
+
+        @Test
+        void sinResponsable_filtraYOrdenaPorFecha() {
+            LocalDate hoy = LocalDate.now();
+            Task sin10;
+            Task conResp;
+            Task sinFecha;
+            Task sin2;
+            try {
+                // El repositorio devuelve, en ESTE orden:
+                // 1) sin responsable con dueDate = hoy + 10d
+                sin10 = new Task(101L, "Sin10", "desc", TaskStatus.TODO, Priority.MED, PROYECTO, null, hoy.plusDays(10));
+                // 2) con responsable (debe descartarse)
+                conResp = new Task(102L, "ConResp", "desc", TaskStatus.TODO, Priority.MED, PROYECTO, 5L, hoy.plusDays(5));
+                // 3) sin responsable sin fecha (null)
+                sinFecha = new Task(103L, "SinFecha", "desc", TaskStatus.TODO, Priority.MED, PROYECTO, null, null);
+                // 4) sin responsable con dueDate = hoy + 2d
+                sin2 = new Task(104L, "Sin2", "desc", TaskStatus.TODO, Priority.MED, PROYECTO, null, hoy.plusDays(2));
+            } catch (TaskValidationException e) {
+                throw new IllegalStateException("dato de prueba inválido", e);
+            }
+
+            when(repository.findAll()).thenReturn(List.of(sin10, conResp, sinFecha, sin2));
+
+            var result = service.sinResponsable();
+
+            // Deben venir SOLO las tres sin responsable, ordenadas por fecha asc (2d, 10d, sin fecha al final)
+            List<Long> ids = result.stream().map(Task::getId).toList();
+            assertEquals(List.of(104L, 101L, 103L), ids);
+        }
+
+        @Test
+        void sinResponsable_soloConResponsable_devuelveVacio() {
+            Task c1;
+            Task c2;
+            try {
+                c1 = new Task(201L, "Con1", "desc", TaskStatus.TODO, Priority.MED, PROYECTO, 1L, null);
+                c2 = new Task(202L, "Con2", "desc", TaskStatus.TODO, Priority.MED, PROYECTO, 2L, null);
+            } catch (TaskValidationException e) {
+                throw new IllegalStateException("dato de prueba inválido", e);
+            }
+            when(repository.findAll()).thenReturn(List.of(c1, c2));
+
+            var result = service.sinResponsable();
+
+            assertEquals(0, result.size());
+        }
+    }
+
     /** Fabrica una Task de rehidratación REAL (dato, no mock). assigneeId null = sin responsable. */
     private Task tarea(Long id, String title, Long assigneeId) {
         try {
