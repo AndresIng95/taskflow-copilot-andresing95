@@ -1,0 +1,56 @@
+ specs/overdue.md                                   | 42 ++++++++++++++++++++++
+ .../com/taskflow/controller/TaskController.java    |  9 +++++
+ .../java/com/taskflow/service/TaskService.java     | 11 ++++++
+ .../com/taskflow/slice/TaskControllerTest.java     | 14 ++++++++
+ .../java/com/taskflow/unit/TaskServiceTest.java    | 31 ++++++++++++++++
+ 5 files changed, 107 insertions(+)
+14	0	src/test/java/com/taskflow/slice/TaskControllerTest.java
+31	0	src/test/java/com/taskflow/unit/TaskServiceTest.java
+
++    /** GET /tasks/overdue — lista tareas vencidas de todos los proyectos. */
++    /**
++     * Devuelve las tareas vencidas según la regla de dominio Task.estaVencida().
++     * Orden: por fecha ascendente (TaskOrders.POR_FECHA).
++     */
++            // vencidas: id 7 (hoy-2), id 9 (hoy-1)
++            // pasada pero DONE -> no aparece
++            // sin fecha -> no aparece
+
+MUTANTE: quitado .sorted(TaskOrders.POR_FECHA) de vencidas()
+
+[INFO] BUILD SUCCESS
+RESTAURADO: TaskService.java quedó exactamente como estaba.
+
+
++     * Devuelve las tareas vencidas según la regla de dominio Task.estaVencida().
++     * Orden: por fecha ascendente (TaskOrders.POR_FECHA).
++                .filter(Task::estaVencida)
++                .sorted(TaskOrders.POR_FECHA)
+
+[INFO] Tests run: 69, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+
+14	0	src/test/java/com/taskflow/slice/TaskControllerTest.java
+39	0	src/test/java/com/taskflow/unit/TaskServiceTest.java
+
++    /** GET /tasks/overdue — lista tareas vencidas de todos los proyectos. */
++    /**
++     * Devuelve las tareas vencidas según la regla de dominio Task.estaVencida().
++     * Orden: por fecha ascendente (TaskOrders.POR_FECHA).
++     */
++            // El repositorio devuelve en este orden:
++            // 1) vencida hace 1 día (debe incluirse)
++            // 2) con fecha en 3 días (futura, no incluir)
++            // 3) DONE pero vencida hace 10 días (no incluir porque está DONE)
++            // 4) sin dueDate (no incluir)
++            // 5) vencida hace 5 días (debe incluirse)
++            // Orden esperado por POR_FECHA ascendente: primero la de hace 5 días (id 15), luego la de 1 día (id 11)
+
+MUTANTE: quitado .sorted(TaskOrders.POR_FECHA) de vencidas()
+
+[INFO] BUILD FAILURE
+RESTAURADO: TaskService.java quedó exactamente como estaba.
+
+
+[INFO] BUILD SUCCESS
+
