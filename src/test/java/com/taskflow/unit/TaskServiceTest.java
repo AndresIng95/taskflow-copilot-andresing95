@@ -166,25 +166,33 @@ class TaskServiceTest {
         @Test
         void vencidas_devuelveSoloVencidasYOrdenadas() throws Exception {
             LocalDate hoy = LocalDate.now();
-            // vencidas: id 7 (hoy-2), id 9 (hoy-1)
-            Task v1 = new Task(7L, "Corregir bug de fechas", "desc", TaskStatus.IN_PROGRESS,
-                    Priority.MED, PROYECTO, 1L, hoy.minusDays(2));
-            Task v2 = new Task(9L, "Otra vencida", "desc", TaskStatus.IN_PROGRESS,
+            // El repositorio devuelve en este orden:
+            // 1) vencida hace 1 día (debe incluirse)
+            Task vencida1dia = new Task(11L, "Vencida 1d", "desc", TaskStatus.IN_PROGRESS,
                     Priority.MED, PROYECTO, 1L, hoy.minusDays(1));
-            // pasada pero DONE -> no aparece
-            Task donePast = new Task(8L, "Hecha vieja", "desc", TaskStatus.DONE,
-                    Priority.HIGH, PROYECTO, 1L, hoy.minusDays(3));
-            // sin fecha -> no aparece
-            Task noDate = new Task(10L, "Sin fecha", "desc", TaskStatus.IN_PROGRESS,
+            // 2) con fecha en 3 días (futura, no incluir)
+            Task futura3 = new Task(12L, "Futura 3d", "desc", TaskStatus.IN_PROGRESS,
+                    Priority.MED, PROYECTO, 1L, hoy.plusDays(3));
+            // 3) DONE pero vencida hace 10 días (no incluir porque está DONE)
+            Task donePasada10 = new Task(13L, "Hecha vieja", "desc", TaskStatus.DONE,
+                    Priority.HIGH, PROYECTO, 1L, hoy.minusDays(10));
+            // 4) sin dueDate (no incluir)
+            Task sinFecha = new Task(14L, "Sin fecha", "desc", TaskStatus.IN_PROGRESS,
                     Priority.HIGH, PROYECTO, 1L, null);
+            // 5) vencida hace 5 días (debe incluirse)
+            Task vencida5dias = new Task(15L, "Vencida 5d", "desc", TaskStatus.IN_PROGRESS,
+                    Priority.MED, PROYECTO, 1L, hoy.minusDays(5));
 
-            when(repository.findAll()).thenReturn(List.of(v1, v2, donePast, noDate));
+            when(repository.findAll()).thenReturn(List.of(
+                    vencida1dia, futura3, donePasada10, sinFecha, vencida5dias
+            ));
 
             var result = service.vencidas();
 
             assertEquals(2, result.size());
-            assertEquals(7L, result.get(0).getId());
-            assertEquals(9L, result.get(1).getId());
+            // Orden esperado por POR_FECHA ascendente: primero la de hace 5 días (id 15), luego la de 1 día (id 11)
+            assertEquals(15L, result.get(0).getId());
+            assertEquals(11L, result.get(1).getId());
         }
     }
 
