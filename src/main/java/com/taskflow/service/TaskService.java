@@ -122,4 +122,15 @@ public class TaskService {
                 .filter(t -> t.getPriority() == priority)
                 .toList();
     }
+
+    /**
+     * Devuelve las tareas vencidas según la regla de dominio Task.estaVencida().
+     * Orden: por fecha ascendente (TaskOrders.POR_FECHA).
+     */
+    public List<Task> vencidas() {
+        return repository.findAll().stream()
+                .filter(Task::estaVencida)
+                .sorted(TaskOrders.POR_FECHA)
+                .toList();
+    }
 }

@@ -21,6 +21,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -86,6 +87,19 @@ class TaskControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].title").value("Primera"));
+    }
+
+    @Test
+    void getTasksOverdue_retorna200YListaEnOrden() throws Exception {
+        LocalDate hoy = LocalDate.now();
+        Task vencida = new Task(7L, "Corregir bug de fechas", "desc", TaskStatus.IN_PROGRESS,
+                com.taskflow.model.Priority.MED, 1L, 1L, hoy.minusDays(1));
+        when(taskService.vencidas()).thenReturn(List.of(vencida));
+
+        mockMvc.perform(get("/tasks/overdue"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].id").value(7));
     }
 
     @Test

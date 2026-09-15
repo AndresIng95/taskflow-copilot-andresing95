@@ -17,6 +17,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -154,6 +156,35 @@ class TaskServiceTest {
             assertThrows(TaskNotFoundException.class, () -> service.eliminar(999L));
             // never() + anyLong(): NO se borró nada. (Regla "todos matchers o ninguno": aquí anyLong()).
             verify(repository, never()).deleteById(anyLong());
+        }
+    }
+
+    @Nested
+    @DisplayName("vencidas")
+    class Vencidas {
+
+        @Test
+        void vencidas_devuelveSoloVencidasYOrdenadas() throws Exception {
+            LocalDate hoy = LocalDate.now();
+            // vencidas: id 7 (hoy-2), id 9 (hoy-1)
+            Task v1 = new Task(7L, "Corregir bug de fechas", "desc", TaskStatus.IN_PROGRESS,
+                    Priority.MED, PROYECTO, 1L, hoy.minusDays(2));
+            Task v2 = new Task(9L, "Otra vencida", "desc", TaskStatus.IN_PROGRESS,
+                    Priority.MED, PROYECTO, 1L, hoy.minusDays(1));
+            // pasada pero DONE -> no aparece
+            Task donePast = new Task(8L, "Hecha vieja", "desc", TaskStatus.DONE,
+                    Priority.HIGH, PROYECTO, 1L, hoy.minusDays(3));
+            // sin fecha -> no aparece
+            Task noDate = new Task(10L, "Sin fecha", "desc", TaskStatus.IN_PROGRESS,
+                    Priority.HIGH, PROYECTO, 1L, null);
+
+            when(repository.findAll()).thenReturn(List.of(v1, v2, donePast, noDate));
+
+            var result = service.vencidas();
+
+            assertEquals(2, result.size());
+            assertEquals(7L, result.get(0).getId());
+            assertEquals(9L, result.get(1).getId());
         }
     }
 
