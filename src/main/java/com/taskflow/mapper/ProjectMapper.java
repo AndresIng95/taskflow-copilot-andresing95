@@ -22,4 +22,11 @@ public final class ProjectMapper {
         return new ProjectResponse(p.getId(), p.getName(), p.getDescription(),
                 p.getOwnerId(), p.getCreatedAt());
     }
+
+    /** Mapea un Project a ProjectSummaryResponse calculando totales por estado y vencidas. */
+    public static com.taskflow.dto.ProjectSummaryResponse aSummaryResponse(Project p, int totalTasks,
+                                                                           java.util.Map<String, Integer> byStatus,
+                                                                           int overdue) {
+        return new com.taskflow.dto.ProjectSummaryResponse(p.getId(), p.getName(), totalTasks, byStatus, overdue);
+    }
 }
