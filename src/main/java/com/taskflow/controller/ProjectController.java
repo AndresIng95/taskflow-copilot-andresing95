@@ -87,6 +87,18 @@ public class ProjectController {
     }
 
     /**
+     * GET /projects/{id}/summary — resumen del proyecto: totales por estado y vencidas.
+     */
+    @Operation(summary = "Resumen de un proyecto",
+            description = "Devuelve totales por estado (TODO/IN_PROGRESS/DONE), totalTasks y overdue.")
+    @GetMapping("/projects/{id}/summary")
+    public com.taskflow.dto.ProjectSummaryResponse getProjectSummary(@PathVariable("id") Long id) {
+        Project proyecto = projectService.buscarPorId(id)
+                .orElseThrow(() -> new ProjectNotFoundException(id));
+        return projectService.resumen(proyecto);
+    }
+
+    /**
      * POST /projects — 201 + Location a /projects/{id}. @Valid dispara Bean Validation (400 si falla).
      * MP-9: el owner sale del JWT — el Authentication (inyectado por Spring Security) trae el username
      * del token; el service lo resuelve a ownerId. El dueño es QUIEN crea, no una constante.
