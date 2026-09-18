@@ -156,7 +156,7 @@ public class TaskController {
 
     /**
      * PATCH /tasks/{id}/assignee — cambia SOLO el assigneeId de una tarea. 404 si no existe, 422 si
-     * la tarea está DONE (TaskStateException), 400 por validación si falta/invalid assigneeId.
+     * la tarea está DONE (TaskStateException), 400 por validación si falta/inválido assigneeId.
      */
     @Operation(summary = "Reasigna el responsable de una tarea",
             description = "Cambia solo el assigneeId. 404 si la tarea no existe; 422 si está DONE.")

@@ -1,5 +1,5 @@
 diff --git a/src/main/java/com/taskflow/controller/TaskController.java b/src/main/java/com/taskflow/controller/TaskController.java
-index 5768d77..6d2007d 100644
+index 5768d77..7d94ea4 100644
 --- a/src/main/java/com/taskflow/controller/TaskController.java
 +++ b/src/main/java/com/taskflow/controller/TaskController.java
 @@ -153,4 +153,19 @@ public class TaskController {
@@ -9,7 +9,7 @@ index 5768d77..6d2007d 100644
 +
 +    /**
 +     * PATCH /tasks/{id}/assignee — cambia SOLO el assigneeId de una tarea. 404 si no existe, 422 si
-+     * la tarea está DONE (TaskStateException), 400 por validación si falta/invalid assigneeId.
++     * la tarea está DONE (TaskStateException), 400 por validación si falta/inválido assigneeId.
 +     */
 +    @Operation(summary = "Reasigna el responsable de una tarea",
 +            description = "Cambia solo el assigneeId. 404 si la tarea no existe; 422 si está DONE.")
@@ -24,7 +24,7 @@ index 5768d77..6d2007d 100644
  }
 diff --git a/src/main/java/com/taskflow/dto/TaskAssigneeUpdateRequest.java b/src/main/java/com/taskflow/dto/TaskAssigneeUpdateRequest.java
 new file mode 100644
-index 0000000..a62585e
+index 0000000..9fb57f1
 --- /dev/null
 +++ b/src/main/java/com/taskflow/dto/TaskAssigneeUpdateRequest.java
 @@ -0,0 +1,15 @@
@@ -38,8 +38,8 @@ index 0000000..a62585e
 + * Solo contiene el id del nuevo responsable. No se permite null ni valores no positivos.
 + */
 +public record TaskAssigneeUpdateRequest(
-+        @NotNull(message = "assigneeId es obligatorio")
-+        @Positive(message = "assigneeId debe ser positivo")
++        @NotNull(message = "El assigneeId es obligatorio.")
++        @Positive(message = "El assigneeId debe ser positivo.")
 +        Long assigneeId
 +) {
 +}
@@ -66,14 +66,13 @@ index 61a51b0..6861f22 100644
  }
 diff --git a/src/test/java/com/taskflow/slice/ReasignarTareaControllerTest.java b/src/test/java/com/taskflow/slice/ReasignarTareaControllerTest.java
 new file mode 100644
-index 0000000..e037ba0
+index 0000000..61765af
 --- /dev/null
 +++ b/src/test/java/com/taskflow/slice/ReasignarTareaControllerTest.java
-@@ -0,0 +1,105 @@
+@@ -0,0 +1,104 @@
 +package com.taskflow.slice;
 +
 +import com.taskflow.controller.TaskController;
-+import com.taskflow.exception.TaskNotFoundException;
 +import com.taskflow.exception.TaskStateException;
 +import com.taskflow.model.Priority;
 +import com.taskflow.model.Task;
@@ -177,13 +176,12 @@ index 0000000..e037ba0
 +}
 diff --git a/src/test/java/com/taskflow/unit/ReasignarTareaServiceTest.java b/src/test/java/com/taskflow/unit/ReasignarTareaServiceTest.java
 new file mode 100644
-index 0000000..bdd0b8d
+index 0000000..071ec5a
 --- /dev/null
 +++ b/src/test/java/com/taskflow/unit/ReasignarTareaServiceTest.java
-@@ -0,0 +1,66 @@
+@@ -0,0 +1,65 @@
 +package com.taskflow.unit;
 +
-+import com.taskflow.exception.TaskNotFoundException;
 +import com.taskflow.exception.TaskStateException;
 +import com.taskflow.exception.TaskValidationException;
 +import com.taskflow.model.Priority;

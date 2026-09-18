@@ -1,6 +1,5 @@
 package com.taskflow.unit;
 
-import com.taskflow.exception.TaskNotFoundException;
 import com.taskflow.exception.TaskStateException;
 import com.taskflow.exception.TaskValidationException;
 import com.taskflow.model.Priority;
